@@ -43,6 +43,8 @@ public class SessionFactoryBuilder {
     private static final String HIBERNATE_IMPLICIT_NAMING_STRATEGY = "hibernate.implicit_naming_strategy";
     private static final String HIBERNATE_PHYSICAL_NAMING_STRATEGY = "hibernate.physical_naming_strategy";
 
+    private static final String HIBERNATE_NAMING_STRATEGY = "hibernate.naming_strategy";
+
     /**
      *
      */
@@ -82,6 +84,15 @@ public class SessionFactoryBuilder {
         // for example: add this to hibernate.cfg.xml
         //<property name="hibernate.naming_strategy">com.gigaspaces.test.persistent.SpaceNamingStrategy</property>
 
+        String namingStrategyClass = config.getProperty(HIBERNATE_NAMING_STRATEGY);
+
+        if (namingStrategyClass != null) {
+            _logger.log( Level.WARNING, "Definition of naming strategy [" +
+                             HIBERNATE_NAMING_STRATEGY + "] found, it's unsupported " +
+                             "since hibernate 5.x used, please use instead either [" +
+                             HIBERNATE_IMPLICIT_NAMING_STRATEGY  + "] or [" +
+                             HIBERNATE_PHYSICAL_NAMING_STRATEGY + "]" );
+        }
 
         String physicalNamingStrategyClass = config.getProperty(HIBERNATE_PHYSICAL_NAMING_STRATEGY);
 
