@@ -86,15 +86,23 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
                 result.add(entry);
             }
         } else {
+
             // try and derive the managedEntries
             allMappedClassMetaData = sessionFactory.getAllClassMetadata();
+
+            logger.info( " --- method createInitialLoadEntries, AbstractHibernateSpaceDataSource ---, allMappedClassMetaData size:" + allMappedClassMetaData.size());
+
             for (Map.Entry<String, ClassMetadata> entry : allMappedClassMetaData.entrySet()) {
                 String entityName = entry.getKey();
                 ClassMetadata classMetadata = entry.getValue();
+                logger.info( "-- within for, Entity name:" + entityName + ", classMetadata.isInherited()=" + classMetadata.isInherited());
                 if (classMetadata.isInherited()) {
                     String superClassEntityName = ((AbstractEntityPersister) classMetadata).getMappedSuperclass();
+                    logger.info( "-- within for, superClassEntityName:" + superClassEntityName );
                     ClassMetadata superClassMetadata = allMappedClassMetaData.get(superClassEntityName);
+                    logger.info( "-- within for, superClassMetadata:" + superClassMetadata );
                     Class superClass = superClassMetadata.getMappedClass();
+                    logger.info( "-- within for, superClass:" + superClass );
                     // only filter out classes that their super class has mappings
                     if (superClass != null) {
                         if (logger.isDebugEnabled()) {

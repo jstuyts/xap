@@ -46,8 +46,11 @@ public class ManagedEntitiesContainer {
         if (managedEntries == null) {
             managedEntries = new HashSet<String>();
             // try and derive the managedEntries
+
             Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
+            logger.info( " --- method createManagedEntries, ManagedEntitiesContainer ---, allClassMetaData size:" + allClassMetaData.size());
             for (String entityname : allClassMetaData.keySet()) {
+                logger.info( "-- within for, Entity name:" + entityname );
                 managedEntries.add(entityname);
             }
         }

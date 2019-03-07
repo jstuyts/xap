@@ -281,11 +281,15 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
                 throw new DataSourceException("Failed to create session factory from properties file [" + hibernateFile + "]", e);
             }
         }
+
+        logger.info( " --- method init, AbstractHibernateExternalDataSource ---" );
+
         if (managedEntries == null) {
             managedEntries = new HashSet<String>();
             // try and derive the managedEntries
             Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
             for (String entityname : allClassMetaData.keySet()) {
+                logger.info( "-- within for, Entity name:" + entityname );
                 managedEntries.add(entityname);
             }
         }
@@ -296,13 +300,18 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
             Set<String> initialLoadEntries = new HashSet<String>();
             // try and derive the managedEntries
             Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
+            logger.info( "allClassMetaData:" + allClassMetaData.size() );
             for (Map.Entry<String, ClassMetadata> entry : allClassMetaData.entrySet()) {
                 String entityname = entry.getKey();
                 ClassMetadata classMetadata = entry.getValue();
+                logger.info( "Within for, entityname=:" + entityname + ", classMetadata=" + classMetadata + ", classMetadata.isInherited()=" + classMetadata.isInherited());
                 if (classMetadata.isInherited()) {
                     String superClassEntityName = ((AbstractEntityPersister) classMetadata).getMappedSuperclass();
+                    logger.info( "Within for, superClassEntityName=" + superClassEntityName );
                     ClassMetadata superClassMetadata = allClassMetaData.get(superClassEntityName);
+                    logger.info( "Within for, superClassMetadata=" + superClassMetadata );
                     Class superClass = superClassMetadata.getMappedClass();
+                    logger.info( "Within for, superClass=" + superClass );
                     // only filter out classes that their super class has mappings
                     if (superClass != null) {
                         if (logger.isDebugEnabled()) {
