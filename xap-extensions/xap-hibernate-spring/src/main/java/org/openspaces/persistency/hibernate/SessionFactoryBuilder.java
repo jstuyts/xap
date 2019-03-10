@@ -19,6 +19,7 @@
  */
 package org.openspaces.persistency.hibernate;
 
+import com.gigaspaces.internal.utils.ClassLoaderUtils;
 import com.j_spaces.kernel.ClassLoaderHelper;
 
 import org.hibernate.SessionFactory;
@@ -109,6 +110,8 @@ public class SessionFactoryBuilder {
                 (ImplicitNamingStrategy) ClassLoaderHelper.loadClass(implicitNamingStrategyClass).newInstance();
             config.setImplicitNamingStrategy(implicitNamingStrategy);
         }
+
+        _logger.info( ClassLoaderUtils.getCurrentClassPathString( "TEST" ) );
 
         return config.buildSessionFactory();
     }
