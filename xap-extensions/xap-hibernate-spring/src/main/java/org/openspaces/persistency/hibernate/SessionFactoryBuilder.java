@@ -62,6 +62,8 @@ public class SessionFactoryBuilder {
             throws Exception {
         Configuration config = null;
 
+        _logger.info( ClassLoaderUtils.getCurrentClassPathString( "TEST-CLASS_LOADER" ) );
+
         try {
             // load the class using reflection to avoid JIT exceptions  
             config = configure((Configuration) ClassLoaderHelper.loadClass(ANNOTATION_CONFIGURATION_CLASS).newInstance(),
@@ -80,6 +82,9 @@ public class SessionFactoryBuilder {
                 throw e;
             }
         }
+
+
+
         // since hibernate doesn't support configuring naming strategies in cfg.xml.
         // added an option to configure it programmatically while using the hibernate.cfg.xml
         // for example: add this to hibernate.cfg.xml
@@ -111,7 +116,7 @@ public class SessionFactoryBuilder {
             config.setImplicitNamingStrategy(implicitNamingStrategy);
         }
 
-        _logger.info( ClassLoaderUtils.getCurrentClassPathString( "TEST" ) );
+
 
         return config.buildSessionFactory();
     }
