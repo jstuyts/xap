@@ -24,9 +24,11 @@ import com.gigaspaces.datasource.ManagedDataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Metamodel;
 import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
-import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.hibernate.metamodel.spi.MetamodelImplementor;
+import org.hibernate.persister.entity.EntityPersister;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
 import org.openspaces.persistency.patterns.ManagedDataSourceEntriesProvider;
 import org.openspaces.persistency.support.ConcurrentMultiDataIterator;
@@ -38,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import javax.persistence.metamodel.EntityType;
 
 /**
  * A base class for Hibernate based external data source implementations.
@@ -287,10 +291,13 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
         if (managedEntries == null) {
             managedEntries = new HashSet<String>();
             // try and derive the managedEntries
-            Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
-            for (String entityname : allClassMetaData.keySet()) {
-                logger.info( "-- within for, Entity name:" + entityname );
-                managedEntries.add(entityname);
+            Metamodel metamodel = sessionFactory.getMetamodel();
+            Set<EntityType<?>> entities = metamodel.getEntities();
+            //Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
+            logger.info( " --- method createManagedEntries, ManagedEntitiesContainer ---, entities size 2_1:" + entities.size());
+            for (EntityType entityType : entities ) {
+                logger.info( "-- within for, Entity name:" + entityType.getName() );
+                managedEntries.add(entityType.getName());
             }
         }
         if (logger.isDebugEnabled()) {
@@ -299,18 +306,17 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
         if (initialLoadEntries == null) {
             Set<String> initialLoadEntries = new HashSet<String>();
             // try and derive the managedEntries
-            Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
-            logger.info( "allClassMetaData:" + allClassMetaData.size() );
-            for (Map.Entry<String, ClassMetadata> entry : allClassMetaData.entrySet()) {
-                String entityname = entry.getKey();
-                ClassMetadata classMetadata = entry.getValue();
-                logger.info( "Within for, entityname=:" + entityname + ", classMetadata=" + classMetadata + ", classMetadata.isInherited()=" + classMetadata.isInherited());
-                if (classMetadata.isInherited()) {
-                    String superClassEntityName = ((AbstractEntityPersister) classMetadata).getMappedSuperclass();
-                    logger.info( "Within for, superClassEntityName=" + superClassEntityName );
-                    ClassMetadata superClassMetadata = allClassMetaData.get(superClassEntityName);
-                    logger.info( "Within for, superClassMetadata=" + superClassMetadata );
-                    Class superClass = superClassMetadata.getMappedClass();
+            Metamodel metamodel = sessionFactory.getMetamodel();
+            MetamodelImplementor metamodelImplementor = (MetamodelImplementor)metamodel;
+            Set<EntityType<?>> entities = metamodel.getEntities();
+
+            logger.info( "allClassMetaData entities:" + entities.size() );
+            for( EntityType entityType : entities ){
+                String entityname = entityType.getName();
+                EntityPersister entityPersister = metamodelImplementor.entityPersister(entityname);
+                logger.info( "Within for, entityname=:" + entityname + ", entityPersister=" + entityPersister + ", classMetadata.isInherited()=" + entityPersister.isInherited());
+                if (entityPersister.isInherited()) {
+                    Class superClass = entityPersister.getMappedClass();
                     logger.info( "Within for, superClass=" + superClass );
                     // only filter out classes that their super class has mappings
                     if (superClass != null) {

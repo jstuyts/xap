@@ -18,12 +18,13 @@ package org.openspaces.persistency.hibernate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Metamodel;
 import org.hibernate.SessionFactory;
-import org.hibernate.metadata.ClassMetadata;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+
+import javax.persistence.metamodel.EntityType;
 
 /**
  * An managed entities container which is used by {@link AbstractHibernateSpaceDataSource} and
@@ -47,11 +48,13 @@ public class ManagedEntitiesContainer {
             managedEntries = new HashSet<String>();
             // try and derive the managedEntries
 
-            Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
-            logger.info( " --- method createManagedEntries, ManagedEntitiesContainer ---, allClassMetaData size:" + allClassMetaData.size());
-            for (String entityname : allClassMetaData.keySet()) {
-                logger.info( "-- within for, Entity name:" + entityname );
-                managedEntries.add(entityname);
+            Metamodel metamodel = sessionFactory.getMetamodel();
+            Set<EntityType<?>> entities = metamodel.getEntities();
+            //Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
+            logger.info( " --- method createManagedEntries, ManagedEntitiesContainer ---, entities size:" + entities.size());
+            for (EntityType entityType : entities ) {
+                logger.info( "-- within for, Entity name:" + entityType.getName() );
+                managedEntries.add(entityType.getName());
             }
         }
         if (logger.isDebugEnabled()) {

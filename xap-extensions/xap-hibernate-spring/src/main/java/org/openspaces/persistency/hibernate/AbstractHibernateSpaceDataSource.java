@@ -24,9 +24,10 @@ import com.j_spaces.kernel.ClassLoaderHelper;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Metamodel;
 import org.hibernate.SessionFactory;
-import org.hibernate.metadata.ClassMetadata;
-import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.hibernate.metamodel.spi.MetamodelImplementor;
+import org.hibernate.persister.entity.EntityPersister;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
 import org.openspaces.persistency.patterns.ManagedEntriesSpaceDataSource;
@@ -37,6 +38,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import javax.persistence.metamodel.EntityType;
 
 /**
  * A base class for Hibernate based {@link SpaceDataSource} implementations.
@@ -57,7 +60,7 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
     private final ManagedEntitiesContainer sessionManager;
     private final SessionFactory sessionFactory;
     private final Map<String, SpaceTypeDescriptor> initialLoadEntriesTypeDescs = new HashMap<String, SpaceTypeDescriptor>();
-    private Map<String, ClassMetadata> allMappedClassMetaData;
+    private Map<String, EntityPersister> allMappedClassMetaData;
 
     public AbstractHibernateSpaceDataSource(SessionFactory sessionFactory, Set<String> managedEntries, int fetchSize,
                                             boolean performOrderById, String[] initialLoadEntries,
@@ -87,21 +90,21 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
             }
         } else {
 
-            // try and derive the managedEntries
-            allMappedClassMetaData = sessionFactory.getAllClassMetadata();
+            Metamodel metamodel = sessionFactory.getMetamodel();
+            MetamodelImplementor metamodelImplementor = (MetamodelImplementor)metamodel;
+            Set<EntityType<?>> entities = metamodel.getEntities();
+
+            allMappedClassMetaData = new HashMap<>();
 
             logger.info( " --- method createInitialLoadEntries, AbstractHibernateSpaceDataSource ---, allMappedClassMetaData size:" + allMappedClassMetaData.size());
 
-            for (Map.Entry<String, ClassMetadata> entry : allMappedClassMetaData.entrySet()) {
-                String entityName = entry.getKey();
-                ClassMetadata classMetadata = entry.getValue();
-                logger.info( "-- within for, Entity name:" + entityName + ", classMetadata.isInherited()=" + classMetadata.isInherited());
-                if (classMetadata.isInherited()) {
-                    String superClassEntityName = ((AbstractEntityPersister) classMetadata).getMappedSuperclass();
-                    logger.info( "-- within for, superClassEntityName:" + superClassEntityName );
-                    ClassMetadata superClassMetadata = allMappedClassMetaData.get(superClassEntityName);
-                    logger.info( "-- within for, superClassMetadata:" + superClassMetadata );
-                    Class superClass = superClassMetadata.getMappedClass();
+            for ( EntityType entityType : entities ) {
+                String entityName = entityType.getName();
+                EntityPersister entityPersister = metamodelImplementor.entityPersister(entityName);
+                allMappedClassMetaData.put( entityName, entityPersister );
+                logger.info( "-- within for, Entity name:" + entityName + ", entityPersister.isInherited()=" + entityPersister.isInherited());
+                if (entityPersister.isInherited()) {
+                    Class superClass = entityPersister.getMappedClass();
                     logger.info( "-- within for, superClass:" + superClass );
                     // only filter out classes that their super class has mappings
                     if (superClass != null) {
