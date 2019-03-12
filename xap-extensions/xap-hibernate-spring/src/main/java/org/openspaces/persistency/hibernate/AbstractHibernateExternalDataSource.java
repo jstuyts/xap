@@ -28,6 +28,7 @@ import org.hibernate.Metamodel;
 import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.metamodel.spi.MetamodelImplementor;
+import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.persister.entity.EntityPersister;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
 import org.openspaces.persistency.patterns.ManagedDataSourceEntriesProvider;
@@ -310,7 +311,12 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
                 String entityname = entityType.getJavaType().getName();
                 EntityPersister entityPersister = metamodelImplementor.entityPersister(entityname);
                 if (entityPersister.isInherited()) {
-                    Class superClass = entityPersister.getMappedClass();
+
+                    AbstractEntityPersister abstractEntityPersister = (AbstractEntityPersister)entityPersister;
+                    String superClassEntityName = abstractEntityPersister.getMappedSuperclass();
+                    EntityPersister superClassEntityPersister = metamodelImplementor.entityPersister(superClassEntityName);
+                    Class superClass = superClassEntityPersister.getMappedClass();
+
                     // only filter out classes that their super class has mappings
                     if (superClass != null) {
                         if (logger.isDebugEnabled()) {

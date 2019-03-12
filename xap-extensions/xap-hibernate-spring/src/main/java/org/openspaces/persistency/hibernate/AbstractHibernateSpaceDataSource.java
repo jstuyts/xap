@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Metamodel;
 import org.hibernate.SessionFactory;
 import org.hibernate.metamodel.spi.MetamodelImplementor;
+import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.persister.entity.EntityPersister;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
@@ -101,7 +102,11 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
                 EntityPersister entityPersister = metamodelImplementor.entityPersister(entityName);
                 allMappedClassMetaData.put( entityName, entityPersister );
                 if (entityPersister.isInherited()) {
-                    Class superClass = entityPersister.getMappedClass();
+                    AbstractEntityPersister abstractEntityPersister = (AbstractEntityPersister)entityPersister;
+                    String superClassEntityName = abstractEntityPersister.getMappedSuperclass();
+                    EntityPersister superClassEntityPersister = metamodelImplementor.entityPersister(superClassEntityName);
+                    Class superClass = superClassEntityPersister.getMappedClass();
+
                     // only filter out classes that their super class has mappings
                     if (superClass != null) {
                         if (logger.isDebugEnabled()) {
