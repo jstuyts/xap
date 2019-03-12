@@ -293,11 +293,11 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
             // try and derive the managedEntries
             Metamodel metamodel = sessionFactory.getMetamodel();
             Set<EntityType<?>> entities = metamodel.getEntities();
-            //Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
             logger.info( " --- method createManagedEntries, ManagedEntitiesContainer ---, entities size 2_1:" + entities.size());
             for (EntityType entityType : entities ) {
-                logger.info( "-- within for, Entity name:" + entityType.getName() );
-                managedEntries.add(entityType.getName());
+                String typeName = entityType.getJavaType().getName();
+                logger.info( "-- within for, Entity name:" + typeName );
+                managedEntries.add( typeName );
             }
         }
         if (logger.isDebugEnabled()) {
@@ -312,7 +312,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
 
             logger.info( "allClassMetaData entities:" + entities.size() );
             for( EntityType entityType : entities ){
-                String entityname = entityType.getName();
+                String entityname = entityType.getJavaType().getName();
                 EntityPersister entityPersister = metamodelImplementor.entityPersister(entityname);
                 logger.info( "Within for, entityname=:" + entityname + ", entityPersister=" + entityPersister + ", classMetadata.isInherited()=" + entityPersister.isInherited());
                 if (entityPersister.isInherited()) {
