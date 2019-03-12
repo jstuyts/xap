@@ -26,6 +26,7 @@ import com.gigaspaces.sync.SpaceSynchronizationEndpointException;
 import com.gigaspaces.sync.TransactionData;
 
 import org.hibernate.HibernateException;
+import org.hibernate.LockOptions;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -35,6 +36,8 @@ import org.hibernate.Transaction;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
+
+import javax.persistence.EntityNotFoundException;
 
 /**
  * The default Hibernate {@link SpaceSynchronizationEndpoint} implementation. Based on Hibernate
@@ -201,7 +204,7 @@ public class DefaultHibernateSpaceSynchronizationEndpoint extends AbstractHibern
 
             // ignore non existing objects - avoid unnecessary failures                            
             try {
-                Object toDelete = session.load(entry.getClass(), id);
+                Object toDelete = session.load(entry.getClass(), id, LockOptions.READ);
 
                 if (toDelete != null)
                     session.delete(toDelete);
@@ -209,6 +212,12 @@ public class DefaultHibernateSpaceSynchronizationEndpoint extends AbstractHibern
                 // ignore non existing objects - avoid unnecessary failures
                 if (logger.isTraceEnabled()) {
                     logger.trace("Delete Entry failed [" + entry + ']', e);
+                }
+            }
+            catch (EntityNotFoundException e) {
+                // ignore non existing objects - avoid unnecessary failures
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Delete Enity failed [" + entry + ']', e);
                 }
             }
 

@@ -25,6 +25,7 @@ import com.gigaspaces.datasource.SQLDataProvider;
 import com.j_spaces.core.client.SQLQuery;
 
 import org.hibernate.HibernateException;
+import org.hibernate.LockOptions;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -38,6 +39,8 @@ import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterat
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.EntityNotFoundException;
 
 /**
  * The default Hibernate external data source implementation. Based on Hibernate {@link Session}.
@@ -120,7 +123,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
             logger.trace("Partial Update Entry [" + bulkItem.toString() + ']');
         }
 
-        // filter non mapped properties 
+        // filter non mapped properties
         final Map<String, Object> itemValues = filterItemValue(bulkItem.getTypeName(), bulkItem.getItemValues());
 
 
@@ -186,16 +189,23 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 throw new DataSourceException(
                         "Object id is null. Make sure object space id and hibernate id are the same property.");
 
-            // ignore non existing objects - avoid unnecessary failures                            
+            // ignore non existing objects - avoid unnecessary failures
             try {
-                Object toDelete = session.load(entry.getClass(), id);
+                Object toDelete = session.load(entry.getClass(), id, LockOptions.READ);
 
-                if (toDelete != null)
-                    session.delete(toDelete);
+                if (toDelete != null) {
+                        session.delete(toDelete);
+                }
             } catch (ObjectNotFoundException e) {
                 // ignore non existing objects - avoid unnecessary failures
                 if (logger.isTraceEnabled()) {
                     logger.trace("Delete Entry failed [" + entry + ']', e);
+                }
+            }
+            catch (EntityNotFoundException e) {
+                // ignore non existing objects - avoid unnecessary failures
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Delete Entity failed [" + entry + ']', e);
                 }
             }
 

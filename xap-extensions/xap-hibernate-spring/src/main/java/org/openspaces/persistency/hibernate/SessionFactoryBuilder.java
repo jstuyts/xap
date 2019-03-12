@@ -26,6 +26,8 @@ import org.hibernate.boot.model.naming.ImplicitNamingStrategy;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.cfg.Configuration;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,7 +64,7 @@ public class SessionFactoryBuilder {
         Configuration config = null;
 
         try {
-            // load the class using reflection to avoid JIT exceptions  
+            // load the class using reflection to avoid JIT exceptions
             config = configure((Configuration) ClassLoaderHelper.loadClass(ANNOTATION_CONFIGURATION_CLASS).newInstance(),
                     hibernateFile);
         } catch (Throwable t) {
@@ -79,6 +81,13 @@ public class SessionFactoryBuilder {
                 throw e;
             }
         }
+
+        if( _logger.isLoggable( Level.FINER ) ) {
+            StringWriter writer = new StringWriter();
+            config.getProperties().list(new PrintWriter(writer));
+            _logger.info("Config properties:" + writer.getBuffer());
+        }
+
         // since hibernate doesn't support configuring naming strategies in cfg.xml.
         // added an option to configure it programmatically while using the hibernate.cfg.xml
         // for example: add this to hibernate.cfg.xml
@@ -109,6 +118,8 @@ public class SessionFactoryBuilder {
                 (ImplicitNamingStrategy) ClassLoaderHelper.loadClass(implicitNamingStrategyClass).newInstance();
             config.setImplicitNamingStrategy(implicitNamingStrategy);
         }
+
+
 
         return config.buildSessionFactory();
     }
