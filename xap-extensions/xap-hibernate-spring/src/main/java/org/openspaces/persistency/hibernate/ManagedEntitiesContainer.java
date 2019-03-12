@@ -50,10 +50,8 @@ public class ManagedEntitiesContainer {
 
             Metamodel metamodel = sessionFactory.getMetamodel();
             Set<EntityType<?>> entities = metamodel.getEntities();
-            logger.info( " --- method createManagedEntries, ManagedEntitiesContainer ---, entities size:" + entities.size());
             for (EntityType entityType : entities ) {
                 String typeName = entityType.getJavaType().getName();
-                logger.info( "-- within for, Entity name:" + typeName );
                 managedEntries.add( typeName );
             }
         }

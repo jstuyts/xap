@@ -96,16 +96,12 @@ public abstract class AbstractHibernateSpaceDataSource extends ManagedEntriesSpa
 
             allMappedClassMetaData = new HashMap<>();
 
-            logger.info( " --- method createInitialLoadEntries, AbstractHibernateSpaceDataSource ---, allMappedClassMetaData size:" + allMappedClassMetaData.size());
-
             for ( EntityType entityType : entities ) {
                 String entityName = entityType.getJavaType().getName();
                 EntityPersister entityPersister = metamodelImplementor.entityPersister(entityName);
                 allMappedClassMetaData.put( entityName, entityPersister );
-                logger.info( "-- within for, Entity name:" + entityName + ", entityPersister.isInherited()=" + entityPersister.isInherited());
                 if (entityPersister.isInherited()) {
                     Class superClass = entityPersister.getMappedClass();
-                    logger.info( "-- within for, superClass:" + superClass );
                     // only filter out classes that their super class has mappings
                     if (superClass != null) {
                         if (logger.isDebugEnabled()) {

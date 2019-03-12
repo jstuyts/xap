@@ -286,17 +286,13 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
             }
         }
 
-        logger.info( " --- method init, AbstractHibernateExternalDataSource ---" );
-
         if (managedEntries == null) {
             managedEntries = new HashSet<String>();
             // try and derive the managedEntries
             Metamodel metamodel = sessionFactory.getMetamodel();
             Set<EntityType<?>> entities = metamodel.getEntities();
-            logger.info( " --- method createManagedEntries, ManagedEntitiesContainer ---, entities size 2_1:" + entities.size());
             for (EntityType entityType : entities ) {
                 String typeName = entityType.getJavaType().getName();
-                logger.info( "-- within for, Entity name:" + typeName );
                 managedEntries.add( typeName );
             }
         }
@@ -310,14 +306,11 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
             MetamodelImplementor metamodelImplementor = (MetamodelImplementor)metamodel;
             Set<EntityType<?>> entities = metamodel.getEntities();
 
-            logger.info( "allClassMetaData entities:" + entities.size() );
             for( EntityType entityType : entities ){
                 String entityname = entityType.getJavaType().getName();
                 EntityPersister entityPersister = metamodelImplementor.entityPersister(entityname);
-                logger.info( "Within for, entityname=:" + entityname + ", entityPersister=" + entityPersister + ", classMetadata.isInherited()=" + entityPersister.isInherited());
                 if (entityPersister.isInherited()) {
                     Class superClass = entityPersister.getMappedClass();
-                    logger.info( "Within for, superClass=" + superClass );
                     // only filter out classes that their super class has mappings
                     if (superClass != null) {
                         if (logger.isDebugEnabled()) {
