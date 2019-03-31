@@ -39,6 +39,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityNotFoundException;
+
 /**
  * The default Hibernate external data source implementation. Based on Hibernate {@link Session}.
  *
@@ -196,6 +198,12 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 // ignore non existing objects - avoid unnecessary failures
                 if (logger.isTraceEnabled()) {
                     logger.trace("Delete Entry failed [" + entry + ']', e);
+                }
+            }
+            catch (EntityNotFoundException e) {
+                // ignore non existing objects - avoid unnecessary failures
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Delete Entity failed [" + entry + ']', e);
                 }
             }
 

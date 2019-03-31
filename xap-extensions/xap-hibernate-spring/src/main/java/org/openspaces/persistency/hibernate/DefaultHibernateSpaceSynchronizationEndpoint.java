@@ -36,6 +36,8 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.EntityNotFoundException;
+
 /**
  * The default Hibernate {@link SpaceSynchronizationEndpoint} implementation. Based on Hibernate
  * {@link Session}.
@@ -209,6 +211,12 @@ public class DefaultHibernateSpaceSynchronizationEndpoint extends AbstractHibern
                 // ignore non existing objects - avoid unnecessary failures
                 if (logger.isTraceEnabled()) {
                     logger.trace("Delete Entry failed [" + entry + ']', e);
+                }
+            }
+            catch (EntityNotFoundException e) {
+                // ignore non existing objects - avoid unnecessary failures
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Delete Enity failed [" + entry + ']', e);
                 }
             }
 
