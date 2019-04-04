@@ -93,7 +93,9 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 latest = bulkItem;
                 switch (bulkItem.getOperation()) {
                     case BulkItem.REMOVE:
+                        logger.info(">>> Within case1=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
                         executeRemove(session, bulkItem);
+                        logger.info(">>> Within case2=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
                         break;
                     case BulkItem.WRITE:
                         executeWrite(session, bulkItem);
@@ -110,6 +112,8 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
             }
             tr.commit();
         } catch (Exception e) {
+            //System.out.println(">>> Within exception 1, getRollbackOnly=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
+            logger.info(">>> Within exception 1, getRollbackOnly=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
             rollbackTx(tr);
             throw new DataSourceException("Failed to execute bulk operation, latest object [" + latest + "]", e);
         } finally {
@@ -192,8 +196,12 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
             try {
                 Object toDelete = session.load(entry.getClass(), id);
 
-                if (toDelete != null)
+                if (toDelete != null ) {
+                    if( session.get( entry.getClass(), id ) == null ) {
+                        logger.info( "BEFORE delete class entry.getClass=" + entry.getClass() + ", id=" + id );
+                    }
                     session.delete(toDelete);
+                }
             } catch (ObjectNotFoundException e) {
                 // ignore non existing objects - avoid unnecessary failures
                 if (logger.isTraceEnabled()) {
@@ -201,9 +209,11 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 }
             }
             catch (EntityNotFoundException e) {
+                logger.info("--- EntityNotFoundException -=-" + e.toString());
+
                 // ignore non existing objects - avoid unnecessary failures
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Delete Entity failed [" + entry + ']', e);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Delete Entity failed [" + entry + ']', e);
                 }
             }
 
