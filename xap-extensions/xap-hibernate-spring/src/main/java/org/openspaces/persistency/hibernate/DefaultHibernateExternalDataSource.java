@@ -93,9 +93,9 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 latest = bulkItem;
                 switch (bulkItem.getOperation()) {
                     case BulkItem.REMOVE:
-                        logger.info(">>> Within case1=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
+                        logger.error(">>> Within case1=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
                         executeRemove(session, bulkItem);
-                        logger.info(">>> Within case2=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
+                        logger.error(">>> Within case2=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
                         break;
                     case BulkItem.WRITE:
                         executeWrite(session, bulkItem);
@@ -194,11 +194,12 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
 
             // ignore non existing objects - avoid unnecessary failures                            
             try {
+                logger.error( "BEFORE session.load=" + entry.getClass() + ", id=" + id );
                 Object toDelete = session.load(entry.getClass(), id);
 
                 if (toDelete != null ) {
                     if( session.get( entry.getClass(), id ) == null ) {
-                        logger.info( "BEFORE delete class entry.getClass=" + entry.getClass() + ", id=" + id );
+                        logger.error( "BEFORE delete class entry.getClass=" + entry.getClass() + ", id=" + id );
                     }
                     session.delete(toDelete);
                 }
@@ -209,11 +210,11 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 }
             }
             catch (EntityNotFoundException e) {
-                logger.info("--- EntityNotFoundException -=-" + e.toString());
+                logger.error("--- EntityNotFoundException -=-" + e.toString());
 
                 // ignore non existing objects - avoid unnecessary failures
-                if (logger.isInfoEnabled()) {
-                    logger.info("Delete Entity failed [" + entry + ']', e);
+                if (logger.isErrorEnabled()) {
+                    logger.error("Delete Entity failed [" + entry + ']', e);
                 }
             }
 
