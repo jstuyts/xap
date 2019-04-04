@@ -113,7 +113,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
             tr.commit();
         } catch (Exception e) {
             //System.out.println(">>> Within exception 1, getRollbackOnly=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
-            logger.info(">>> Within exception 1, getRollbackOnly=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
+            logger.error(">>> Within exception 1, getRollbackOnly=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
             rollbackTx(tr);
             throw new DataSourceException("Failed to execute bulk operation, latest object [" + latest + "]", e);
         } finally {
@@ -196,12 +196,15 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
             try {
                 logger.error( "BEFORE session.load=" + entry.getClass() + ", id=" + id );
                 Object toDelete = session.load(entry.getClass(), id);
-
+                logger.error( "AFTER session.load=" + entry.getClass() + ", id=" + id + ", toDelete=" + toDelete);
                 if (toDelete != null ) {
+                    logger.error( "Contains:" + session.contains( entry )  );
                     if( session.get( entry.getClass(), id ) == null ) {
                         logger.error( "BEFORE delete class entry.getClass=" + entry.getClass() + ", id=" + id );
                     }
+                    logger.error( "Before delete toDelete=" + toDelete );
                     session.delete(toDelete);
+                    logger.error( "After delete" );
                 }
             } catch (ObjectNotFoundException e) {
                 // ignore non existing objects - avoid unnecessary failures
