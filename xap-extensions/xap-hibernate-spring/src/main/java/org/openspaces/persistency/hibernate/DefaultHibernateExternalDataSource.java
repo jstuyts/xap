@@ -194,17 +194,19 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
 
             // ignore non existing objects - avoid unnecessary failures                            
             try {
-                logger.error( "BEFORE session.load=" + entry.getClass() + ", id=" + id );
-                Object toDelete = session.load(entry.getClass(), id);
-                logger.error( "AFTER session.load=" + entry.getClass() + ", id=" + id + ", toDelete=" + toDelete);
+                Class<?> entryClass = entry.getClass();
+                logger.error( "B load=" + entryClass + ", id=" + id );
+                Object toDelete = session.load(entryClass, id);
+                logger.error( "A load=" + entryClass + ", id=" + id + ", toDelete=" + toDelete);
                 if (toDelete != null ) {
-                    logger.error( "Contains:" + session.contains( entry )  );
-                    if( session.get( entry.getClass(), id ) == null ) {
-                        logger.error( "BEFORE delete class entry.getClass=" + entry.getClass() + ", id=" + id );
+                    Object o = session.get(entryClass, id);
+                    logger.error( "Get obj=" + o );
+                    if( o == null ) {
+                        logger.error( "B delete class entry.getClass=" + entryClass + ", id=" + id );
                     }
-                    logger.error( "Before delete toDelete=" + toDelete );
+                    //logger.error( "B delete toDelete=" + toDelete );
                     session.delete(toDelete);
-                    logger.error( "After delete" );
+                    logger.error( "A delete" );
                 }
             } catch (ObjectNotFoundException e) {
                 // ignore non existing objects - avoid unnecessary failures
