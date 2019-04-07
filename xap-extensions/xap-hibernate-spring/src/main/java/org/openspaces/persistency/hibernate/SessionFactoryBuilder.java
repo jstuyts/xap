@@ -85,7 +85,7 @@ public class SessionFactoryBuilder {
             }
         }
 
-        if( _logger.isLoggable( Level.INFO ) ) {
+        if( _logger.isLoggable( Level.FINER ) ) {
             StringWriter writer = new StringWriter();
             config.getProperties().list(new PrintWriter(writer));
             _logger.info("Config properties:" + writer.getBuffer());
