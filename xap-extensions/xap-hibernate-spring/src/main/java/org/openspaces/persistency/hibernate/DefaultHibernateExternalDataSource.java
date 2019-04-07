@@ -93,9 +93,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 latest = bulkItem;
                 switch (bulkItem.getOperation()) {
                     case BulkItem.REMOVE:
-                        logger.error(">>> Within case1=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
                         executeRemove(session, bulkItem);
-                        logger.error(">>> Within case2=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
                         break;
                     case BulkItem.WRITE:
                         executeWrite(session, bulkItem);
@@ -112,8 +110,6 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
             }
             tr.commit();
         } catch (Exception e) {
-            //System.out.println(">>> Within exception 1, getRollbackOnly=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
-            logger.error(">>> Within exception 1, getRollbackOnly=" + tr.getRollbackOnly() + ", status=" + tr.getStatus() );
             rollbackTx(tr);
             throw new DataSourceException("Failed to execute bulk operation, latest object [" + latest + "]", e);
         } finally {
@@ -126,7 +122,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
             logger.trace("Partial Update Entry [" + bulkItem.toString() + ']');
         }
 
-        // filter non mapped properties 
+        // filter non mapped properties
         final Map<String, Object> itemValues = filterItemValue(bulkItem.getTypeName(), bulkItem.getItemValues());
 
 
@@ -192,22 +188,12 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 throw new DataSourceException(
                         "Object id is null. Make sure object space id and hibernate id are the same property.");
 
-            // ignore non existing objects - avoid unnecessary failures                            
+            // ignore non existing objects - avoid unnecessary failures
             try {
-                Class<?> entryClass = entry.getClass();
-                logger.error( "B load=" + entryClass + ", id=" + id );
-                Object toDelete = session.load(entryClass, id);
-                logger.error( "A load=" + entryClass + ", id=" + id + ", toDelete=" + toDelete);
-                if (toDelete != null ) {
-                    Object o = session.get(entryClass, id);
-                    logger.error( "Get obj=" + o );
-                    if( o == null ) {
-                        logger.error( "B delete class entry.getClass=" + entryClass + ", id=" + id );
-                    }
-                    //logger.error( "B delete toDelete=" + toDelete );
+                Object toDelete = session.load(entry.getClass(), id);
+
+                if (toDelete != null)
                     session.delete(toDelete);
-                    logger.error( "A delete" );
-                }
             } catch (ObjectNotFoundException e) {
                 // ignore non existing objects - avoid unnecessary failures
                 if (logger.isTraceEnabled()) {
@@ -215,11 +201,9 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 }
             }
             catch (EntityNotFoundException e) {
-                logger.error("--- EntityNotFoundException -=-" + e.toString());
-
                 // ignore non existing objects - avoid unnecessary failures
-                if (logger.isErrorEnabled()) {
-                    logger.error("Delete Entity failed [" + entry + ']', e);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Delete Entity failed [" + entry + ']', e);
                 }
             }
 
