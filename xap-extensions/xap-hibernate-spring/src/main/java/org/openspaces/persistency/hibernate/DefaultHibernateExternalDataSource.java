@@ -193,7 +193,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 Object toDelete = session.load(entry.getClass(), id);
 
                 if (toDelete != null) {
-                    logger.error( "get=" + session.get(entry.getClass(), id) );
+                    logger.error( "get=" + session.get(entry.getClass(), id) + ", cont:" + session.contains( toDelete ) );
                     session.delete(toDelete);
                 }
             } catch (ObjectNotFoundException e) {
