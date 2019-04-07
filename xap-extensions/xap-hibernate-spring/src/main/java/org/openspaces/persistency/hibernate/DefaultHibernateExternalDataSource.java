@@ -192,8 +192,10 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
             try {
                 Object toDelete = session.load(entry.getClass(), id);
 
-                if (toDelete != null)
+                if (toDelete != null) {
+                    logger.error( "get=" + session.get(entry.getClass(), id) );
                     session.delete(toDelete);
+                }
             } catch (ObjectNotFoundException e) {
                 // ignore non existing objects - avoid unnecessary failures
                 if (logger.isTraceEnabled()) {
@@ -201,6 +203,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 }
             }
             catch (EntityNotFoundException e) {
+                logger.error( "~~~ EXCEPTION=", e );
                 // ignore non existing objects - avoid unnecessary failures
                 if (logger.isTraceEnabled()) {
                     logger.trace("Delete Entity failed [" + entry + ']', e);
