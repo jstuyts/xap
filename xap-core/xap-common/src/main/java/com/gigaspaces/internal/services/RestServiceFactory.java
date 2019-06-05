@@ -44,7 +44,8 @@ public class RestServiceFactory extends ServiceFactory {
                 .appendRequired(ClasspathBuilder.startsWithFilter("spring-", "commons-", "xap-datagrid", "xap-openspaces", "xap-asm", "xap-trove", "xap-premium-common"))
                 .appendOptional("jetty")
                 .appendOptional("jetty/xap-jetty")
-                .appendOptional("jackson");
+                .appendOptional("jackson")
+                .appendOptional("metrics");
 
     }
 }
