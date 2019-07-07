@@ -191,7 +191,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
 
             // ignore non existing objects - avoid unnecessary failures
             try {
-                Object toDelete = session.load(entry.getClass(), id, LockOptions.READ);
+                Object toDelete = session.load(entry.getClass(), id );//, LockOptions.READ);
 
                 if (toDelete != null) {
                         session.delete(toDelete);
