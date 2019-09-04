@@ -339,7 +339,8 @@ public class SystemConfig {
             classpathBuilder.appendPlatform("javax");
         }
         //GS-13825 added hsql jar
-        classpathBuilder.appendOptional("jdbc");
+        classpathBuilder.appendOptional("jdbc",
+                                        file -> file.getName().startsWith("hsqldb-" ) && file.getName().endsWith(".jar" ) );
 
         // I don't expect anybody to use this feature, but its here just to be on the safe side
         boolean osInCommonClassLoader = Boolean.parseBoolean(System.getProperty("com.gs.pu.classloader.os-in-common-classloader", "false"));
