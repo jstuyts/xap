@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -88,6 +89,7 @@ public class HsqlDbReporter extends MetricReporter {
         }
     }
 
+
     private Connection createConnection( String driverClassName, String url, String username, String password ) {
         Connection con = null;
         try {
@@ -96,7 +98,10 @@ public class HsqlDbReporter extends MetricReporter {
                 try {
                     synchronized (_lock) {
                         if( Singletons.get( hsqldDbConnectionKey ) == null ) {
-                            con = DriverManager.getConnection(url, username, password);
+                            Properties connectionProperties =
+                                createConnectionProperties(username, password);
+
+                            con = DriverManager.getConnection(url, connectionProperties);
                             Singletons.putIfAbsent(hsqldDbConnectionKey, con);
                             _logger.info("Connection to [" + url + "] successfully created");
                         }
@@ -126,6 +131,27 @@ public class HsqlDbReporter extends MetricReporter {
         }
 
         return con;
+    }
+
+    private Properties createConnectionProperties(String username, String password) {
+        Properties connectionProperties  = new Properties();
+        connectionProperties.put("user", username);
+        connectionProperties.put("password", password);
+
+        connectionProperties.put("hsqldb.cache_rows", Integer.toString( 1000 ) );//hsqldb default value is 50000, Indicates the maximum number of rows of cached tables that are held in memory.
+        connectionProperties.put("hsqldb.cache_size", Integer.toString( 100 ) );//hsqldb default value is 10000, Indicates the total size (in kilobytes) of rows in the memory cache used with cached tables
+        connectionProperties.put("hsqldb.default_table_type", "cached" );
+        connectionProperties.put("hsqldb.write_delay", Boolean.FALSE.toString() );
+        connectionProperties.put("hsqldb.result_max_memory_rows", Integer.toString( 3000 ) );
+        /*  http://hsqldb.org/doc/2.0/guide/dbproperties-chapt.html */
+/*
+        create=true;
+        hsqldb.tx=mvcc;hsqldb.applog=0;
+        hsqldb.sqllog=0;
+        hsqldb.lob_compressed=true;
+        hsqldb.lob_file_scale=1;
+*/
+        return connectionProperties;
     }
 
     public void report(List<MetricRegistrySnapshot> snapshots) {
