@@ -75,7 +75,7 @@ public class HsqlDbReporter extends MetricReporter {
             if( servers.length > 0 ) {
                 String firstManagerHost = servers[0].getHost();
                 // EXAMPLE of url: "jdbc:hsqldb:hsql://localhost:9101/metricsdb"
-                final String url = "jdbc:hsqldb:hsql://" + firstManagerHost + ":" + port + "/" + dbName;
+                final String url = "jdbc:hsqldb:hsql://" + firstManagerHost + ":" + port + "/" + dbName;// + ";hsqldb.cache_size=112";
                 try {
                     (new Thread(
                         () -> con = createConnection(driverClassName, url, username, password)))
@@ -98,10 +98,11 @@ public class HsqlDbReporter extends MetricReporter {
                 try {
                     synchronized (_lock) {
                         if( Singletons.get( hsqldDbConnectionKey ) == null ) {
+/*
                             Properties connectionProperties =
                                 createConnectionProperties(username, password);
-
-                            con = DriverManager.getConnection(url, connectionProperties);
+*/
+                            con = DriverManager.getConnection(url, username, password);
                             Singletons.putIfAbsent(hsqldDbConnectionKey, con);
                             _logger.info("Connection to [" + url + "] successfully created");
                         }
@@ -144,13 +145,6 @@ public class HsqlDbReporter extends MetricReporter {
         connectionProperties.put("hsqldb.write_delay", Boolean.FALSE.toString() );
         connectionProperties.put("hsqldb.result_max_memory_rows", Integer.toString( 3000 ) );
         /*  http://hsqldb.org/doc/2.0/guide/dbproperties-chapt.html */
-/*
-        create=true;
-        hsqldb.tx=mvcc;hsqldb.applog=0;
-        hsqldb.sqllog=0;
-        hsqldb.lob_compressed=true;
-        hsqldb.lob_file_scale=1;
-*/
         return connectionProperties;
     }
 
