@@ -145,6 +145,10 @@ public class SpaceServiceDetails extends PlainServiceDetails {
         return (SpaceURL) getAttributes().get(Attributes.SPACE_URL);
     }
 
+    public boolean isSecured(){
+        return space.isSecured();
+    }
+
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
