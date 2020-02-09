@@ -52,6 +52,7 @@ public class SpaceServiceDetails extends PlainServiceDetails {
         public static final String URL = "url";
         public static final String SPACE_URL = "spaceUrl";
         public static final String MIRROR = "mirror";
+        public static final String SECURED = "secured";
     }
 
     private IJSpace space;
@@ -107,6 +108,7 @@ public class SpaceServiceDetails extends PlainServiceDetails {
         longDescription = spaceURL.getContainerName() + ":" + spaceURL.getSpaceName();
         getAttributes().put(Attributes.URL, space.getFinderURL().toString());
         getAttributes().put(Attributes.SPACE_URL, space.getFinderURL());
+        getAttributes().put(Attributes.SECURED, space.isSecured());
 
         if (id == null) {
             this.id = serviceSubType + ":" + spaceURL.getSpaceName();
@@ -146,7 +148,7 @@ public class SpaceServiceDetails extends PlainServiceDetails {
     }
 
     public boolean isSecured(){
-        return space.isSecured();
+        return (Boolean) getAttributes().get(Attributes.SECURED);
     }
 
     @Override
