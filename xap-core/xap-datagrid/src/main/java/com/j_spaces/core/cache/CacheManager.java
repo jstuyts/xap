@@ -108,6 +108,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -5427,6 +5428,7 @@ public class CacheManager extends AbstractCacheManager
             TypeData typeData = _typeDataMap.get(serverTypeDesc);
             if (typeData == null) {
                 typeData = _typeDataFactory.createTypeData(serverTypeDesc);
+                _logger.info( "Put to _typeDataMap" + _typeDataMap + " ,serverTypeDesc="  + serverTypeDesc + "--- name=" + serverTypeDesc.getTypeName() + ", hashCode:" + serverTypeDesc.hashCode() + ", already contains such key:" + _typeDataMap.get(serverTypeDesc) );
                 _typeDataMap.put(serverTypeDesc, typeData);
 
                 if (!_engine.isLocalCache())
@@ -5455,8 +5457,8 @@ public class CacheManager extends AbstractCacheManager
                 }
             });
 
-            /*
             if( !typeName.equals(IServerTypeDesc.ROOT_TYPE_NAME) ) {
+                _logger.info( "" + JSpaceUtilities.getStackTrace( new Exception( "--DEBUG_EXCEPTION-- [" + typeName + "]" ) ) );
                 _engine.getDataTypeReadCountMetricRegistrator(typeName).register(registrator.toPath("data", "read-count"), new Gauge<Long>() {
                     @Override
                     public Long getValue() throws Exception {
@@ -5465,7 +5467,7 @@ public class CacheManager extends AbstractCacheManager
                         return objectTypeReadCounts == null ? 0 : objectTypeReadCounts.longValue();
                     }
                 });
-            }*/
+            }
 
             if (!typeName.equals(IServerTypeDesc.ROOT_TYPE_NAME) && isBlobStoreCachePolicy()) {
                 if (getBlobStoreStorageHandler().getOffHeapCache() != null)
