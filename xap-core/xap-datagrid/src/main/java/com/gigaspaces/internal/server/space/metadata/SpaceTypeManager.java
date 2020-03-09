@@ -351,6 +351,8 @@ public class SpaceTypeManager {
         final String typeName = serverTypeDesc.getTypeName();
         logEnter("activateServerTypeDesc", "typeName", typeName);
 
+        _logger.info( "---activateServerTypeDesc, typeDesc=" + typeDesc );
+
         serverTypeDesc.setTypeDesc(typeDesc);
 
         if (_logger.isLoggable(Level.FINE)) {
