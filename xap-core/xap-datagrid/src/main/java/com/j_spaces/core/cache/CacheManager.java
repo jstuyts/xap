@@ -5442,7 +5442,6 @@ public class CacheManager extends AbstractCacheManager
             TypeData typeData = _typeDataMap.get(serverTypeDesc);
             if (typeData == null) {
                 typeData = _typeDataFactory.createTypeData(serverTypeDesc);
-                _logger.info( "Put to _typeDataMap" + _typeDataMap + " ,serverTypeDesc="  + serverTypeDesc + "--- name=" + serverTypeDesc.getTypeName() + ", hashCode:" + serverTypeDesc.hashCode() + ", already contains such key:" + _typeDataMap.get(serverTypeDesc) );
                 _typeDataMap.put(serverTypeDesc, typeData);
 
                 if (!_engine.isLocalCache())
@@ -5472,7 +5471,6 @@ public class CacheManager extends AbstractCacheManager
             });
 
             if( !typeName.equals(IServerTypeDesc.ROOT_TYPE_NAME) ) {
-                _logger.info( "" + JSpaceUtilities.getStackTrace( new Exception( "--DEBUG_EXCEPTION-- [" + typeName + "]" ) ) );
                 _engine.getDataTypeReadCountMetricRegistrator(typeName).register(registrator.toPath("data", "read-count"), new Gauge<Long>() {
                     @Override
                     public Long getValue() throws Exception {
@@ -5496,7 +5494,7 @@ public class CacheManager extends AbstractCacheManager
             final MetricRegistrator registrator = _engine.getMetricRegistrator();
             registrator.unregisterByPrefix(registrator.toPath("data", "entries", metricTypeName));
             registrator.unregisterByPrefix(registrator.toPath("data", "notify-templates", metricTypeName));
-            registrator.unregisterByPrefix(registrator.toPath("data", "read-count", metricTypeName));
+            _engine.getDataTypeReadCountMetricRegistrator( typeName ).unregisterByPrefix(registrator.toPath("data", "read-count"));
             if (!typeName.equals(IServerTypeDesc.ROOT_TYPE_NAME) && isBlobStoreCachePolicy()) {
                 short typeDescCode = _typeManager.getServerTypeDesc(typeName).getServerTypeDescCode();
                 if (getBlobStoreStorageHandler().getOffHeapCache() != null) {
